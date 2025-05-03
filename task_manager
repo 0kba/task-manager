@@ -1,0 +1,140 @@
+import os
+import sys
+from datetime import datetime
+
+# Function to ask the user for task details
+def ask_to_add_task():
+    title_answer = input("Please enter the task title: ").lower()
+
+    valid_priorities = ["high", "medium", "low"]
+    priority_answer = input(f"Enter the priority (High / Medium / Low) for the task '{title_answer}': ").lower()
+    while priority_answer not in valid_priorities:
+        priority_answer = input("Invalid input. Please enter High, Medium, or Low: ").lower()
+
+    while True:
+        due_date_answer = input(f"What is the due date (YYYY-MM-DD) for '{title_answer}'? ").strip()
+        try:
+            due_date_obj = datetime.strptime(due_date_answer, "%Y-%m-%d")
+            if due_date_obj.date() >= datetime.today().date():
+                break
+            else:
+                print("Due date cannot be in the past.")
+        except ValueError:
+            print("Invalid format. Please use YYYY-MM-DD.")
+
+    return f"{title_answer} | {priority_answer} | {due_date_answer}"
+
+# Function to write a task to the file
+def add_the_task():
+    with open(file_name, "a") as file:
+        file.write(ask_to_add_task() + "\n")
+    print("Task added successfully!")
+
+# Convert a line from the file into a dictionary
+def line_to_dict(line):
+    parts = [part.strip() for part in line.split("|")]
+    return {"title": parts[0], "priority": parts[1], "due_date": parts[2]}
+
+# Display tasks in a user-friendly format
+def better_task_form(dics):
+    final = []
+    for dic in dics:
+        good_dic = f"{dic['title']} is a {dic['priority']} priority task due on {dic['due_date']}"
+        final.append(good_dic)
+    for count, task in enumerate(final, start=1):
+        print(f"{count}: {task}")
+
+# ---- Main Program Logic ----
+try:
+    file_name = input("Please enter the file name (including extension): ")
+
+    if os.path.exists(file_name):
+        print(f"The file '{file_name}' exists. Welcome to the tasks program!")
+    else:
+        user_file_answer = input(f"'{file_name}' doesn't exist. Type 'yes' to create it or 'exit' to quit: ").strip().lower()
+        if user_file_answer == "yes":
+            open(file_name, "w").close()
+            print(f"'{file_name}' was created. Welcome to the tasks program!")
+        elif user_file_answer == "exit":
+            sys.exit()
+        else:
+            print("Invalid entry. The program will exit now. Thank you.")
+            sys.exit()
+
+    while True:
+        user_choice = input(
+            "\nPlease choose an option:\n"
+            "  1  >> Add a task\n"
+            "  2  >> Delete a task\n"
+            "  3  >> View tasks sorted by due date\n"
+            "  4  >> View tasks sorted by priority\n"
+            "  exit >> Exit program\n"
+            "Your choice: "
+        ).lower()
+
+        if user_choice == "1":
+            add_the_task()
+
+        elif user_choice == "2":
+            delete_task = input("Enter the title of the task you want to delete: ").lower()
+            with open(file_name, 'r') as file:
+                lines = file.readlines()
+
+            found = False
+            with open(file_name, 'w') as file:
+                for line in lines:
+                    if delete_task in line:
+                        print(f"'{delete_task}' was deleted successfully.")
+                        found = True
+                        continue
+                    file.write(line)
+
+            if not found:
+                print(f"'{delete_task}' does not exist.")
+
+        elif user_choice == "3":
+            tasks = []
+            with open(file_name, "r") as file:
+                for line in file:
+                    tasks.append(line_to_dict(line))
+            sorted_tasks = sorted(tasks, key=lambda task: datetime.strptime(task['due_date'], "%Y-%m-%d"))
+            better_task_form(sorted_tasks)
+
+        elif user_choice == "4":
+            tasks = []
+            priority_order = {"high": 1, "medium": 2, "low": 3}
+            with open(file_name, "r") as file:
+                for line in file:
+                    tasks.append(line_to_dict(line))
+            sorted_tasks_p = sorted(tasks, key=lambda task: priority_order[task['priority'].lower()])
+            better_task_form(sorted_tasks_p)
+
+        elif user_choice == "exit":
+            print("Thank you for using the task manager. Goodbye!")
+            break
+
+        else:
+            print(f"'{user_choice}' is not a valid choice. Please enter 1, 2, 3, 4, or 'exit'.")
+
+except Exception as e:
+    print(f"\nAn unexpected error occurred:\n{e}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
