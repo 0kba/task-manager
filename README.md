@@ -7,7 +7,7 @@ View tasks sorted by due date or priority
 \## ? How to Use
 
 1\. Clone the repo or download the script: \`\`\`bash git clone
-https://github.com/your-username/task-manager.git cd task-manager Run
+https://github.com/0kba/task-manager.git cd task-manager Run
 the script:
 
 bash Copy Edit python task_manager.py Follow the on-screen instructions
